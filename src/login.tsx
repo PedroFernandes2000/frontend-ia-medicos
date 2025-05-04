@@ -91,7 +91,7 @@ const Login = () => {
 
       <div className="hidden md:block w-1/2">
         <img
-          src="public/Cruz Digital com Linhas Circuitais.png"
+          src="https://github.com/PedroFernandes2000/frontend-ia-medicos/blob/main/public/Cruz%20Digital%20com%20Linhas%20Circuitais.png?raw=true"
           alt="IA_medicos"
           className="object-cover w-full h-full rounded-l-[40px]"
         />
