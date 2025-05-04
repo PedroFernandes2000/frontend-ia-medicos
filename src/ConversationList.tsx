@@ -42,7 +42,7 @@ const ConversationList: React.FC<Props> = ({ conversations, selected, setSelecte
                   className="flex justify-between items-center p-4 rounded hover:bg-blue-50 cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <img src={conv.avatarUrl} alt="" className="w-10 h-10 rounded-full border border-blue-300" />
+                    <img src={conv.avatarUrl} alt={"foto de "+ conv.contactName} className="w-10 h-10 rounded-full border border-blue-300" />
                     <span className="text-blue-900">{conv.contactName}</span>
                   </div>
                   <div className="bg-blue-300 text-white text-xs px-2 py-1 rounded-full">
