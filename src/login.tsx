@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
+// Tipo para o usuário
+type Usuario = {
+  email: string;
+  senha: string;
+  nome?: string;
+};
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,18 +16,45 @@ const Login = () => {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [erro, setErro] = useState('');
   const [estaCadastrando, setEstaCadastrando] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const navigate = useNavigate();
+
+  // Usuário padrão
+  const usuarioPadrao: Usuario = {
+    email: 'admin@ia.com',
+    senha: '123456789'
+  };
+
+  // Função para obter usuários do localStorage
+  const getUsuariosCadastrados = (): Usuario[] => {
+    const usuarios = localStorage.getItem('usuarios');
+    return usuarios ? JSON.parse(usuarios) : [];
+  };
+
+  // Função para salvar usuário no localStorage
+  const salvarUsuario = (usuario: Usuario) => {
+    const usuarios = getUsuariosCadastrados();
+    usuarios.push(usuario);
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Simulação de backend (credenciais válidas)
-    const usuarioValido = {
-      email: 'admin@ia.com',
-      senha: '123456789'
-    };
+    // Verifica usuário padrão
+    if (email === usuarioPadrao.email && senha === usuarioPadrao.senha) {
+      navigate('/dashboard');
+      return;
+    }
 
-    if (email === usuarioValido.email && senha === usuarioValido.senha) {
+    // Verifica usuários cadastrados
+    const usuariosCadastrados = getUsuariosCadastrados();
+    const usuarioEncontrado = usuariosCadastrados.find(
+      (user) => user.email === email && user.senha === senha
+    );
+
+    if (usuarioEncontrado) {
       navigate('/dashboard');
     } else {
       setErro('Email ou senha incorretos');
@@ -29,7 +64,7 @@ const Login = () => {
   const handleCadastro = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validações básicas
+    // Validações
     if (senha !== confirmarSenha) {
       setErro('As senhas não coincidem');
       return;
@@ -39,12 +74,29 @@ const Login = () => {
       setErro('A senha deve ter pelo menos 8 caracteres');
       return;
     }
+
+    // Verifica se email já existe
+    const usuariosCadastrados = getUsuariosCadastrados();
+    const usuarioExistente = usuariosCadastrados.find(
+      (user) => user.email === email
+    );
+
+    if (usuarioExistente) {
+      setErro('Este email já está cadastrado');
+      return;
+    }
+
+    // Cria novo usuário
+    const novoUsuario: Usuario = {
+      nome,
+      email,
+      senha
+    };
+
+    // Salva no localStorage
+    salvarUsuario(novoUsuario);
     
-    // Simulação de cadastro bem-sucedido
-    // Aqui você normalmente faria uma chamada à API
-    console.log('Usuário cadastrado:', { nome, email, senha });
-    
-    // Limpa o formulário e volta para o login
+    // Limpa o formulário e mostra mensagem
     setNome('');
     setEmail('');
     setSenha('');
@@ -52,12 +104,11 @@ const Login = () => {
     setErro('');
     setEstaCadastrando(false);
     
-    // Mostra mensagem de sucesso (opcional)
     alert('Cadastro realizado com sucesso! Faça login para continuar.');
   };
 
   return (
-    <div className={"flex min-h-screen overflow-hidden" + (!estaCadastrando ? " max-h-screen" : "")}>
+    <div className="flex min-h-screen max-h-screen overflow-hidden">
       <div className="w-full md:w-1/2 flex items-center justify-center p-10">
         <div className="max-w-md w-full">
           <h2 className="text-3xl font-bold mb-2">
@@ -100,36 +151,58 @@ const Login = () => {
 
             <div>
               <label className="block mb-1 text-sm font-medium">Senha</label>
-              <input
-                type="password"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder={estaCadastrando ? "Crie uma senha (mín. 8 caracteres)" : "*********"}
-                required
-                minLength={estaCadastrando ? 8 : undefined}
-              />
+              <div className="relative">
+                <input
+                  type={mostrarSenha ? "text" : "password"}
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
+                  placeholder={estaCadastrando ? "Crie uma senha (mín. 8 caracteres)" : "*********"}
+                  required
+                  minLength={estaCadastrando ? 8 : undefined}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {mostrarSenha ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
 
             {estaCadastrando && (
               <div>
                 <label className="block mb-1 text-sm font-medium">Confirmar Senha</label>
-                <input
-                  type="password"
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Confirme sua senha"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={mostrarConfirmarSenha ? "text" : "password"}
+                    value={confirmarSenha}
+                    onChange={(e) => setConfirmarSenha(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
+                    placeholder="Confirme sua senha"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+                    aria-label={mostrarConfirmarSenha ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {mostrarConfirmarSenha ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
               </div>
             )}
 
             {!estaCadastrando && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <input type="checkbox" className="mr-2" />
-                  <label className="text-sm">Lembre-se de mim</label>
+                  <input type="checkbox" id="lembrar" className="mr-2" />
+                  <label htmlFor="lembrar" className="text-sm cursor-pointer">
+                    Lembre-se de mim
+                  </label>
                 </div>
                 <div>
                   <a href="#" className="text-sm text-blue-500 hover:underline">
@@ -177,8 +250,8 @@ const Login = () => {
 
       <div className="hidden md:block w-1/2">
         <img
-          src="https://github.com/PedroFernandes2000/frontend-ia-medicos/blob/main/public/Cruz%20Digital%20com%20Linhas%20Circuitais.png?raw=true"
-          alt="IA_medicos"
+          src="/Cruz Digital com Linhas Circuitais.png"
+          alt="IA Médicos"
           className="object-cover w-full h-full rounded-l-[40px]"
         />
       </div>
