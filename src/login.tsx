@@ -108,7 +108,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen max-h-screen overflow-hidden">
+    <div className={"flex min-h-screen overflow-hidden"+ (estaCadastrando ? "" : " max-h-screen")}>
       <div className="w-full md:w-1/2 flex items-center justify-center p-10">
         <div className="max-w-md w-full">
           <h2 className="text-3xl font-bold mb-2">
