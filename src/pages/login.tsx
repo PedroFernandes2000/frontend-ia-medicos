@@ -1,13 +1,9 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-
-// Tipo para o usuário
-type Usuario = {
-  email: string;
-  senha: string;
-  nome?: string;
-};
+import { Cookies } from 'react-cookie';
+import { authLogin, authRegister } from '../services/authService';
+const cookies = new Cookies();
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,97 +14,130 @@ const Login = () => {
   const [estaCadastrando, setEstaCadastrando] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Usuário padrão
-  const usuarioPadrao: Usuario = {
-    email: 'admin@ia.com',
-    senha: '123456789'
+
+  // Validações
+  const validarEmail = (email:string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
   };
 
-  // Função para obter usuários do localStorage
-  const getUsuariosCadastrados = (): Usuario[] => {
-    const usuarios = localStorage.getItem('usuarios');
-    return usuarios ? JSON.parse(usuarios) : [];
+  const validarSenha = (senha:string) => {
+    return senha.length >= 8;
   };
 
-  // Função para salvar usuário no localStorage
-  const salvarUsuario = (usuario: Usuario) => {
-    const usuarios = getUsuariosCadastrados();
-    usuarios.push(usuario);
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-  };
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e:React.FormEvent) => {
     e.preventDefault();
+    setErro('');
 
-    // Verifica usuário padrão
-    if (email === usuarioPadrao.email && senha === usuarioPadrao.senha) {
-      navigate('/dashboard');
+    // Validações para login
+    if (!email) {
+      setErro('Por favor, informe seu email');
       return;
     }
 
-    // Verifica usuários cadastrados
-    const usuariosCadastrados = getUsuariosCadastrados();
-    const usuarioEncontrado = usuariosCadastrados.find(
-      (user) => user.email === email && user.senha === senha
-    );
+    if (!validarEmail(email)) {
+      setErro('Por favor, informe um email válido');
+      return;
+    }
 
-    if (usuarioEncontrado) {
-      navigate('/dashboard');
-    } else {
-      setErro('Email ou senha incorretos');
+    if (!senha) {
+      setErro('Por favor, informe sua senha');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await authLogin(email, senha);
+
+      if (response.accessToken) {
+        cookies.set('accessToken', response.accessToken, {
+          path: '/',
+          maxAge: 60 * 60 * 24,
+          secure: false,
+          sameSite: 'lax',
+        });
+        await navigate("/")
+        
+      } else {
+        setErro(response.error || 'Credenciais inválidas. Verifique seu email e senha.');
+      }
+    } catch (error) {
+      console.error('Erro durante o login:', error);
+      setErro('Erro ao conectar ao servidor. Por favor, tente novamente mais tarde.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleCadastro = (e: React.FormEvent) => {
+  const handleCadastro = async (e:React.FormEvent) => {
     e.preventDefault();
-    
-    // Validações
-    if (senha !== confirmarSenha) {
-      setErro('As senhas não coincidem');
+    setErro('');
+
+  
+    if (!nome) {
+      setErro('Por favor, informe seu nome completo');
       return;
     }
-    
-    if (senha.length < 8) {
+
+    if (!email) {
+      setErro('Por favor, informe seu email');
+      return;
+    }
+
+    if (!validarEmail(email)) {
+      setErro('Por favor, informe um email válido');
+      return;
+    }
+
+    if (!senha) {
+      setErro('Por favor, informe uma senha');
+      return;
+    }
+
+    if (!validarSenha(senha)) {
       setErro('A senha deve ter pelo menos 8 caracteres');
       return;
     }
 
-    // Verifica se email já existe
-    const usuariosCadastrados = getUsuariosCadastrados();
-    const usuarioExistente = usuariosCadastrados.find(
-      (user) => user.email === email
-    );
-
-    if (usuarioExistente) {
-      setErro('Este email já está cadastrado');
+    if (senha !== confirmarSenha) {
+      setErro('As senhas não coincidem');
       return;
     }
 
-    // Cria novo usuário
-    const novoUsuario: Usuario = {
-      nome,
-      email,
-      senha
-    };
-
-    // Salva no localStorage
-    salvarUsuario(novoUsuario);
-    
-    // Limpa o formulário e mostra mensagem
-    setNome('');
-    setEmail('');
-    setSenha('');
-    setConfirmarSenha('');
-    setErro('');
-    setEstaCadastrando(false);
-    
-    alert('Cadastro realizado com sucesso! Faça login para continuar.');
+    try {
+      setIsLoading(true);
+      const response = await authRegister(nome, email, senha);
+      
+      if (response.ok) {
+        setNome('');
+        setEmail('');
+        setSenha('');
+        setConfirmarSenha('');
+        setErro('');
+        setEstaCadastrando(false);
+        
+        alert('Cadastro realizado com sucesso! Faça login para continuar.');
+      } else {
+      
+        if (response.error === 'EMAIL_EXISTS') {
+          setErro('Este email já está cadastrado. Tente fazer login.');
+        } else {
+          setErro(response.message || 'Erro ao realizar cadastro. Por favor, tente novamente.');
+        }
+      }
+    } catch (error) {
+      console.error('Erro durante o cadastro:', error);
+      setErro('Erro ao conectar ao servidor. Por favor, tente novamente mais tarde.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className={"flex min-h-screen overflow-hidden"+ (estaCadastrando ? "" : " max-h-screen")}>
+    <div className={"flex min-h-screen overflow-hidden" + (estaCadastrando ? "" : " max-h-screen")}>
       <div className="w-full md:w-1/2 flex items-center justify-center p-10">
         <div className="max-w-md w-full">
           <h2 className="text-3xl font-bold mb-2">
@@ -120,7 +149,11 @@ const Login = () => {
               : 'Coloque seu email e senha para acessar a sua conta.'}
           </p>
 
-          {erro && <div className="text-red-500 mb-2">{erro}</div>}
+          {erro && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 text-red-700">
+              <p>{erro}</p>
+            </div>
+          )}
 
           <form className="space-y-4" onSubmit={estaCadastrando ? handleCadastro : handleLogin}>
             {estaCadastrando && (
@@ -170,6 +203,11 @@ const Login = () => {
                   {mostrarSenha ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
+              {estaCadastrando && (
+                <p className="mt-1 text-xs text-gray-500">
+                  A senha deve ter pelo menos 8 caracteres
+                </p>
+              )}
             </div>
 
             {estaCadastrando && (
@@ -214,16 +252,30 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-blue-700 text-white py-2 rounded-md hover:bg-blue-800 transition"
+              disabled={isLoading}
+              className={`w-full ${isLoading ? 'bg-blue-500' : 'bg-blue-700'} text-white py-2 rounded-md hover:bg-blue-800 transition flex items-center justify-center`}
             >
-              {estaCadastrando ? 'Cadastrar' : 'Entrar'}
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {estaCadastrando ? 'Cadastrando...' : 'Entrando...'}
+                </>
+              ) : (
+                estaCadastrando ? 'Cadastrar' : 'Entrar'
+              )}
             </button>
           </form>
 
           <div className="my-6 text-center text-gray-500">ou</div>
 
           <div className="flex gap-4">
-            <button className="flex-1 border px-1 py-3 rounded-md flex items-center justify-center gap-2 hover:bg-gray-100">
+            <button 
+              disabled={isLoading}
+              className="flex-1 border px-1 py-3 rounded-md flex items-center justify-center gap-2 hover:bg-gray-100 disabled:opacity-50"
+            >
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
               <span className="text-sm">
                 {estaCadastrando ? 'Cadastre-se com o Google' : 'Entre com o Google'}
@@ -241,6 +293,7 @@ const Login = () => {
                 setErro('');
               }}
               className="text-blue-500 hover:underline focus:outline-none"
+              disabled={isLoading}
             >
               {estaCadastrando ? 'Faça login' : 'Inscreva-se'}
             </button>
