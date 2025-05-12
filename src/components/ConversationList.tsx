@@ -1,6 +1,5 @@
 import React from 'react';
 import { Conversation, ServiceStatus } from '../types';
-
 interface ConversationListProps {
   conversations: Conversation[];
   selected: Conversation | null;
@@ -27,20 +26,28 @@ const ConversationList: React.FC<ConversationListProps> = ({
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-2">
           <span className="font-medium">Status do serviço</span>
-          <div className="relative inline-block w-12 align-middle select-none">
-            <input
-              type="checkbox"
-              checked={status.isActive}
-              onChange={(e) => handleToggleStatus(e.target.checked)}
-              className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-            />
-            <label
-              className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer ${
-                status.isActive ? 'bg-green-400' : 'bg-gray-300'
-              }`}
-            ></label>
+            <div className="relative inline-block w-12 h-6 align-middle select-none">
+              <input
+                type="checkbox"
+                checked={status.isActive}
+                onChange={(e) => handleToggleStatus(e.target.checked)}
+                className="sr-only"
+              />
+              <div
+                className={`toggle-label block w-12 h-6 rounded-full cursor-pointer transition-colors duration-300 ${
+                  status.isActive ? 'bg-green-400' : 'bg-gray-300'
+                }`}
+                onClick={() => handleToggleStatus(!status.isActive)}
+              >
+                <div
+                  className={`w-6 h-6 bg-white rounded-full shadow-md transform duration-300 ease-in-out ${
+                    status.isActive ? 'translate-x-0' : 'translate-x-6'
+                  }`}
+                ></div>
+              </div>
+            </div>
           </div>
-        </div>
+
         <p className="text-xs text-gray-500">
           {status.isActive
             ? `Ativado em: ${status.lastActivated}`
