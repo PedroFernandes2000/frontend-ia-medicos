@@ -111,7 +111,8 @@ const Login = () => {
       setIsLoading(true);
       const response = await authRegister(nome, email, senha);
       
-      if (response.ok) {
+      console.log(response)
+      if (response.user) {
         setNome('');
         setEmail('');
         setSenha('');
@@ -119,7 +120,6 @@ const Login = () => {
         setErro('');
         setEstaCadastrando(false);
         
-        alert('Cadastro realizado com sucesso! Faça login para continuar.');
       } else {
       
         if (response.error === 'EMAIL_EXISTS') {
