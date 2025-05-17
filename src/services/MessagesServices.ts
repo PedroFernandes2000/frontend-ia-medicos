@@ -3,7 +3,7 @@ import { Cookies } from 'react-cookie';
 import { Conversation } from '../types';
 
 
-const backend_url = "http://localhost:3000";
+const backend_url = import.meta.env.VITE_BACKEND_URL;
 
 class MessageService {
   private api: AxiosInstance;
