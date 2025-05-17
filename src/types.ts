@@ -9,12 +9,19 @@ export interface Message {
 }
 
 // Define types for conversations
-export interface Conversation {
-  id: string;
-  name: string;
-  reviewed: boolean;
-  messages: Message[];
-}
+export type Conversation = {
+  users: {
+    id: string,
+    name: string,
+    number: string
+  }[],  
+  metrics: {
+    totalRecebidas: number,  
+    totalEnviadas: number,
+    pendentes: number,
+    taxaResposta: number
+  }
+};
 
 // Define service status type
 export interface ServiceStatus {

@@ -38,7 +38,7 @@ class MessageService {
   }
   
  
-  async getAllMessages(): Promise<Conversation[]> {
+  async getAllMessages(): Promise<Conversation> {
     try {
       const response = await this.api.get('/webhooks/getAllMessages');
       return response.data;
