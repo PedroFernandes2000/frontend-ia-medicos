@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Cookies } from 'react-cookie';
 import { authLogin, authRegister } from '../services/authService';
+
 const cookies = new Cookies();
 
 const Login = () => {
@@ -15,10 +16,8 @@ const Login = () => {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  
 
-
-  // Validações
   const validarEmail = (email:string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
@@ -32,7 +31,7 @@ const Login = () => {
     e.preventDefault();
     setErro('');
 
-    // Validações para login
+
     if (!email) {
       setErro('Por favor, informe seu email');
       return;
@@ -59,7 +58,7 @@ const Login = () => {
           secure: false,
           sameSite: 'lax',
         });
-        await navigate("/")
+        window.location.href = "/";
         
       } else {
         setErro(response.error || 'Credenciais inválidas. Verifique seu email e senha.');
