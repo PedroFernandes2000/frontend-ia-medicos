@@ -17,7 +17,7 @@ class MessageService {
     }
     
     this.api = axios.create({
-      baseURL: `${backend_url}/api`,
+      baseURL: `${backend_url}`,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

@@ -19,13 +19,13 @@ export async function authLogin(email: string, password: string) {
     }
 }
 
-export async function authRegister(name:string,email: string, password: string) {
+export async function authRegister(name:string,email: string, password: string,confirmPassword:string) {
     try {
         const response = await fetch(`${backend_url}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ name,email, password }),
+            body: JSON.stringify({ name,email, password,confirmPassword}),
         });
         const data = await response.json();
         

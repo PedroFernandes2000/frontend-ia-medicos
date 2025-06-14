@@ -5,16 +5,8 @@ import axios from 'axios';
 import { Conversation, ServiceStatus } from '../types';
 import messageService from '../services/MessagesServices';
 import {MessageSquare, Send, CheckCircle, AlertTriangle } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { StatusComponent } from '../components/StatusComponent';
 
-const mockChartData = [
-  { name: 'Jan', recebidas: 40, enviadas: 35 },
-  { name: 'Fev', recebidas: 45, enviadas: 42 },
-  { name: 'Mar', recebidas: 60, enviadas: 58 },
-  { name: 'Abr', recebidas: 90, enviadas: 85 },
-  { name: 'Mai', recebidas: 75, enviadas: 72 },
-];
 
 const Dashboard: React.FC = () => {
   const [conversationData, setConversationData] = useState<{
@@ -119,7 +111,7 @@ const Dashboard: React.FC = () => {
     <div className="flex flex-col min-h-screen font-sans bg-gray-50 text-gray-800">
       <header className="flex justify-between items-center px-6 py-4 bg-white border-b shadow-sm">
         <div className="flex items-center gap-2">
-          <h1 className="text-blue-800 text-lg font-medium">Mensagens Automáticas</h1>
+          <h1 className="text-blue-800 text-lg font-medium">IA Médicos - Mensagens</h1>
         </div>
       </header>
 
@@ -151,7 +143,7 @@ const Dashboard: React.FC = () => {
                   setStatus={handleServiceStatusChange}
                 />
             </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                 <StatsCard 
                   title="Mensagens Recebidas" 
                   value={conversationData.metrics.totalRecebidas} 
@@ -178,38 +170,6 @@ const Dashboard: React.FC = () => {
                 />
               </div>
               
-             
-              <div className="bg-white p-4 rounded-lg shadow-md">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-lg font-medium text-gray-700">Histórico de Mensagens</h2>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <span className="text-sm text-gray-600">Recebidas</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                      <span className="text-sm text-gray-600">Enviadas</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={mockChartData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="recebidas" fill="#3B82F6" />
-                      <Bar dataKey="enviadas" fill="#10B981" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
             </div>
           </div>
         )}

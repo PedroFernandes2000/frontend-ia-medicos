@@ -57,7 +57,7 @@ const Register = () => {
 
     try {
       setIsLoading(true);
-      const response = await authRegister(nome, email, senha);
+      const response = await authRegister(nome, email, senha, confirmarSenha);
 
       console.log(response);
       if (response.user) {
@@ -66,6 +66,7 @@ const Register = () => {
         setSenha('');
         setConfirmarSenha('');
         setErro('');
+         window.location.href = '/login';
       } else {
         if (response.error === 'EMAIL_EXISTS') {
           setErro('Este email já está cadastrado. Tente fazer login.');
