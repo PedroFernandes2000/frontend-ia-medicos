@@ -40,7 +40,7 @@ class MessageService {
  
   async getAllMessages(): Promise<Conversation> {
     try {
-      const response = await this.api.get('/webhooks/getAllMessages');
+      const response = await this.api.get('/getAllMessages');
       return response.data;
     } catch (error) {
       console.error('Error fetching all messages:', error);
@@ -50,7 +50,7 @@ class MessageService {
   
   async getMessageById(id: string): Promise<Conversation> {
     try {
-      const response = await this.api.post(`/webhooks/getMessage/${id}`);
+      const response = await this.api.post(`/getMessage/${id}`);
       console.log(response.data)
       return response.data;
     } catch (error) {
@@ -61,7 +61,7 @@ class MessageService {
   
   async getSystemStatus(): Promise<{ active: boolean }> {
     try {
-      const response = await this.api.get('/webhooks/systemStatus');
+      const response = await this.api.get('/systemStatus');
       return response.data;
     } catch (error) {
       console.error('Error fetching system status:', error);
@@ -71,7 +71,7 @@ class MessageService {
   
   async markAsReviewed(id: string): Promise<Conversation> {
     try {
-      const response = await this.api.patch(`/webhooks/markAsReviewed/${id}`);
+      const response = await this.api.patch(`/markAsReviewed/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error marking conversation ${id} as reviewed:`, error);
@@ -82,7 +82,7 @@ class MessageService {
  
   async updateServiceStatus(isActive: boolean) {
     try {
-      const response = await this.api.post('/webhooks/system', { "state":isActive });
+      const response = await this.api.post('/system', { "state":isActive });
       return response.data;
     } catch (error) {
       console.error('Error updating service status:', error);
